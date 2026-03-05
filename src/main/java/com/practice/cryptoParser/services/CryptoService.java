@@ -32,3 +32,9 @@ public class CryptoService {
     }
 
 }
+    public void deleteCryptoByName(Long Name){
+        cryptoRepository.deleteById(Name);
+        log.info("Crypto {} deleted", Name);
+    }
+
+}

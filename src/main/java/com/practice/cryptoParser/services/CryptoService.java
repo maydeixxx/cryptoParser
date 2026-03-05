@@ -1,6 +1,7 @@
 package com.practice.cryptoParser.services;
 
 import com.practice.cryptoParser.api.CryptoDTO;
+import com.practice.cryptoParser.models.CryptoModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,13 @@ public class CryptoService {
     private final CryptoMapper cryptoMapper;
 
     public void saveModel(CryptoDTO model) {
-        cryptoRepository.save(cryptoMapper.dtoToEntity(model));
-        log.info("Crypto saved");
+        CryptoModel savedModel = cryptoRepository.save(cryptoMapper.dtoToEntity(model));
+
+        if (savedModel != null && savedModel.getId() != null) {
+            log.info("Crypto saved successfully with id: {}", savedModel.getId());
+        } else {
+            log.error("unlucky");
+        }
     }
 
     public CryptoDTO getById(Long id) {
@@ -31,9 +37,12 @@ public class CryptoService {
         log.info("Crypto {} deleted", id);
     }
 
-}
-    public void deleteCryptoByName(Long Name){
-        cryptoRepository.deleteById(Name);
+    public void checkstatus(String Status) {
+
+    }
+
+    public void deleteCryptoByName(String Name) {
+        cryptoRepository.deleteByName(Name);
         log.info("Crypto {} deleted", Name);
     }
 

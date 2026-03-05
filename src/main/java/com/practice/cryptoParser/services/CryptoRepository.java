@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CryptoRepository extends JpaRepository<CryptoModel, Long> {
+
+    void deleteByName(String name);
+
 }

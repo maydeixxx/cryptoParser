@@ -18,7 +18,7 @@ public class CryptoService {
     public void saveModel(CryptoDTO model) {
         CryptoModel savedModel = cryptoRepository.save(cryptoMapper.dtoToEntity(model));
 
-        if (savedModel != null && savedModel.getId() != null) {
+        if (savedModel.getId() != null) {
             log.info("Crypto saved successfully with id: {}", savedModel.getId());
         } else {
             log.error("unlucky");
@@ -37,7 +37,7 @@ public class CryptoService {
         log.info("Crypto {} deleted", id);
     }
 
-    public void checkstatus(String Status) {
+    public void checkStatus(String status) {
 
     }
 

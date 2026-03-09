@@ -1,0 +1,16 @@
+services:
+  crypto_postgres:
+    image: postgres:17.4
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=crypto_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - crypto_postgres:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d  # Для скриптов инициализации
+    restart: unless-stopped
+
+volumes:
+  crypto_postgres:

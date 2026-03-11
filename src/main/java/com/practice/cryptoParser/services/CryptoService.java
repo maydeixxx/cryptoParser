@@ -3,14 +3,12 @@ package com.practice.cryptoParser.services;
 import com.practice.cryptoParser.api.CryptoDTO;
 import com.practice.cryptoParser.models.CryptoModel;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.Request;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -60,19 +58,18 @@ public class CryptoService {
                 log.info(String.valueOf(elements.size()));
                 for (int j = 0; j <= 15-1; j++){
                     saveModel(CryptoDTO.builder()
-                            .price(BigDecimal.valueOf(Double.parseDouble(values.get(j).text().substring(1).replace(",",""))))
-                            .name(elements.get(j).text())
+                            .price(new BigDecimal(values.get(j).text().substring(1).replace(",","")))
+                            .name(elements.get(j).text().toLowerCase())
                             .circSupply(circSupply.get(j).text())
-                            .marketCap(BigDecimal.valueOf(Long.parseLong(marketCaps.get(j).text().substring(1).replace(",",""))))
-                            .volume(BigDecimal.valueOf(Long.parseLong(volume24H.get(j).text().substring(1).replace(",",""))))
+                            .marketCap(Long.parseLong(marketCaps.get(j).text().substring(1).replace(",","")))
+                            .volume(Long.parseLong(volume24H.get(j).text().substring(1).replace(",","")))
                             .build()
                     );
                 }
-
-
             }
-
-
+        } catch (NumberFormatException e) {
+            log.error("NUMBER FORMAT EXCEPTION");
+            throw new RuntimeException(e);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -86,18 +83,27 @@ public class CryptoService {
         );
     }
 
+    @Transactional
     public void deleteCrypto(Long id) {
         cryptoRepository.deleteById(id);
         log.info("Crypto {} deleted", id);
     }
 
-    public void deleteCryptoByName(String Name) {
-        cryptoRepository.deleteByName(Name);
-        log.info("Crypto {} deleted", Name);
+    @Transactional
+    public void deleteCryptoByName(String name) {
+        cryptoRepository.deleteByName(name.toLowerCase());
+        log.info("Crypto {} deleted", name);
     }
 
     public List<CryptoDTO> getAll() {
         return cryptoRepository.findAll().stream().map(cryptoMapper::entityToDto).toList();
+    }
+
+    public CryptoDTO getByName(String name) {
+        return cryptoMapper.entityToDto(
+                cryptoRepository.getByName(name.toLowerCase())
+                .orElseThrow(() -> new NullPointerException(String.format("Crypto %s not found", name)))
+        );
     }
 
 }

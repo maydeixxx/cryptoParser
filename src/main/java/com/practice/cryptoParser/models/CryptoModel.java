@@ -13,10 +13,17 @@ public class CryptoModel {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
+
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = false)
     private BigDecimal price;
-    private BigDecimal marketCap;
-    private BigDecimal volume; //24h
+
+    private Long marketCap;
+
+    private Long volume; //24h
+
     private String circSupply;
 
 }

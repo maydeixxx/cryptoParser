@@ -13,7 +13,7 @@ import java.util.List;
 public class CryptoController {
     private final CryptoService cryptoService;
 
-    @GetMapping("/get/{maxPage}")
+    @GetMapping("/parse/{maxPage}")
     private ResponseEntity<?> getCrypto(@PathVariable int maxPage) {
         cryptoService.parse(maxPage);
         return ResponseEntity.ok(String.format("Parsed %d pages", maxPage));
@@ -62,6 +62,16 @@ public class CryptoController {
             return ResponseEntity.ok(String.format("Crypto %s deleted", name));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getCause());
+        }
+    }
+
+    @PatchMapping("/update/{name}")
+    private ResponseEntity<?> updateCryptoByName(@PathVariable String name) {
+        try {
+            cryptoService.updateDataForCrypto(name);
+            return ResponseEntity.ok(String.format("Crypto %s updated.", name));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

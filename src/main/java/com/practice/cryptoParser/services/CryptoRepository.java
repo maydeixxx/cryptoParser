@@ -12,6 +12,6 @@ public interface CryptoRepository extends JpaRepository<CryptoModel, Long> {
 
     void deleteByName(String name);
 
-    Optional<CryptoModel> getByName(String name);
+    Optional<CryptoModel> findCryptoModelByName(String name);
 
 }

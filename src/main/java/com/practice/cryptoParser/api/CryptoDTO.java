@@ -16,8 +16,8 @@ public class CryptoDTO {
     private Long id;
     private String name;
     private BigDecimal price;
-    private Long marketCap;
-    private Long volume; //24h
+    private String marketCap;
+    private String volume; //24h
     private String circSupply;
 
 }

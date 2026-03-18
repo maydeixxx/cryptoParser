@@ -20,9 +20,9 @@ public class CryptoModel {
     @Column(nullable = false)
     private BigDecimal price;
 
-    private Long marketCap;
+    private String marketCap;
 
-    private Long volume; //24h
+    private String volume; //24h
 
     private String circSupply;
 

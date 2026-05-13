@@ -1,5 +1,6 @@
 package com.practice.cryptoParser.api;
 
+import com.practice.cryptoParser.services.CryptoMapper;
 import com.practice.cryptoParser.services.CryptoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cryptoService")
 @RequiredArgsConstructor
+@RequestMapping("/cryptoService")
 public class CryptoController {
     private final CryptoService cryptoService;
+    private final CryptoMapper cryptoMapper;
 
     @GetMapping("/parse/{maxPage}")
     private ResponseEntity<?> getCrypto(@PathVariable int maxPage) {
@@ -21,38 +23,28 @@ public class CryptoController {
 
     @GetMapping("/getAll")
     private ResponseEntity<?> getAllCrypto() {
-        List<CryptoDTO> all = cryptoService.getAll();
-        return ResponseEntity.ok(all);
+        List<CryptoDTO> allCrypto = cryptoService.getAll().stream()
+                .map(cryptoMapper::domainToDto)
+                .toList();
+        return ResponseEntity.ok(allCrypto);
     }
 
     @GetMapping("/getById/{id}")
     private ResponseEntity<?> getCryptoById(@PathVariable Long id) {
-        try {
-            CryptoDTO cryptoDTO = cryptoService.getById(id);
-            return ResponseEntity.ok(cryptoDTO);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getCause());
-        }
+        CryptoDTO cryptoDTO = cryptoMapper.domainToDto(cryptoService.getById(id));
+        return ResponseEntity.ok(cryptoDTO);
     }
 
     @GetMapping("/getByName/{name}")
     private ResponseEntity<?> getCryptoByName(@PathVariable String name) {
-        try {
-            CryptoDTO crypto = cryptoService.getByName(name);
-            return ResponseEntity.ok(crypto);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getCause());
-        }
+        CryptoDTO crypto = cryptoMapper.domainToDto(cryptoService.getByName(name));
+        return ResponseEntity.ok(crypto);
     }
 
     @DeleteMapping("/deleteById/{id}")
     private ResponseEntity<?> deleteCryptoById(@PathVariable Long id) {
-        try {
-            cryptoService.deleteCrypto(id);
-            return ResponseEntity.ok(String.format("Crypto %d deleted", id));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getCause());
-        }
+        cryptoService.deleteCrypto(id);
+        return ResponseEntity.ok(String.format("Crypto %d deleted", id));
     }
 
     @DeleteMapping("/deleteByName/{name}")
@@ -62,16 +54,6 @@ public class CryptoController {
             return ResponseEntity.ok(String.format("Crypto %s deleted", name));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getCause());
-        }
-    }
-
-    @PatchMapping("/update/{name}")
-    private ResponseEntity<?> updateCryptoByName(@PathVariable String name) {
-        try {
-            cryptoService.updateDataForCrypto(name);
-            return ResponseEntity.ok(String.format("Crypto %s updated.", name));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

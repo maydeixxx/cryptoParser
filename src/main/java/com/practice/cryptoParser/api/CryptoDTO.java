@@ -18,6 +18,6 @@ public class CryptoDTO {
     private BigDecimal price;
     private String marketCap;
     private String volume; //24h
-    private String circSupply;
+    private String url;
 
 }

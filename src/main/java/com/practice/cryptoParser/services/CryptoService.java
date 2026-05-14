@@ -3,6 +3,7 @@ package com.practice.cryptoParser.services;
 import com.practice.cryptoParser.models.CryptoDomain;
 import com.practice.cryptoParser.models.CryptoModel;
 import com.practice.cryptoParser.models.exceptions.CryptoModelNotFoundException;
+import com.practice.cryptoParser.models.exceptions.CryptoParsingException;
 import com.practice.cryptoParser.models.exceptions.CryptoRepositoryException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,8 +77,6 @@ public class CryptoService {
                 }
             }
 
-            log.info("Total unique hrefs to process: {}", queueHrefs.size());
-
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             while (!queueHrefs.isEmpty()) {
                 String href = queueHrefs.poll();
@@ -86,12 +85,14 @@ public class CryptoService {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     try {
                         semaphore.acquire();
+
                         String url;
                         if (href.contains("#markets")) {
                             url = href.replace("#markets", "");
                         } else {
                             url = href;
                         }
+
                         Map<String, Object> cryptoInfo = getCryptoInfo(href);
                         Integer code = (Integer) cryptoInfo.get("code");
 
@@ -125,10 +126,14 @@ public class CryptoService {
                         } catch (DataIntegrityViolationException e) {
                             log.warn("Crypto {} exists, skip", nameLower);
                             processedCoins.remove(nameLower);
+                        } catch (Exception e) {
+                            log.error("Error while saving crypto {}: {}", nameLower, e.getMessage());
+                            throw new CryptoRepositoryException("Error while saving crypto " + nameLower);
                         }
 
                     } catch (Exception e) {
                         log.error("Error processing crypto {}: {}", href, e.getMessage());
+                        throw new CryptoParsingException("Error while parsing crypto: " + e.getMessage());
                     } finally {
                         semaphore.release();
                     }
@@ -198,7 +203,7 @@ public class CryptoService {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 50, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
     public void updateDataForCrypto() {
         List<CryptoDomain> all = getAll();
         if (all.isEmpty()) {
